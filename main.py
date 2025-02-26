@@ -1,11 +1,19 @@
 from tkinter import *
+import tkinter as tk
 from PIL import Image, ImageTk
+import requests
 
-random_word = 'game'
 """Predefine a random word and the number of attempts"""
 guessed_letters = set()
+attempts = 10
 
-import tkinter as tk
+response = requests.get("https://random-word-api.herokuapp.com/word")
+if response.status_code == 200:
+    random_word = response.json()[0]
+    print("Random word:", random_word)
+else:
+    print("Failed to fetch a word")
+
 
 def play_multiplayer():
     # Clear all widgets inside the frame
@@ -50,10 +58,11 @@ def start_multiplayer(typed_word):
     submit_btn = tk.Button(frame, text="Submit", command=lambda: check(typed_letter,masked_word, typed_word))
 
 
-    submit_btn.pack(pady=5)
     typed_letter.pack(pady=5)
     new_label.pack(pady=5)
     masked_word.pack()
+    submit_btn.pack(pady=5)
+
     
 
 def start_solo():
@@ -68,20 +77,15 @@ def start_solo():
     submit_btn = tk.Button(frame, text="Submit", command=lambda: check(typed_letter, masked_word, random_word))
 
 
-    submit_btn.pack(pady=5)
     typed_letter.pack(pady=5)
     new_label.pack(pady=5)
     masked_word.pack()
-    
+    submit_btn.pack(pady=5)
+
 
 def check(letter, masked, word):
     # letter.delete(0, tk.END)
     global current_label
-
-    if len(letter.get()) > 1 or letter.get().isalpha == False:
-        invalid_letter_message = tk.Label(frame, text='Please type a valid letter', fg="red")
-        invalid_letter_message.pack(pady=5)
-        root.after(3000, invalid_letter_message.destroy)
 
 
     if letter.get() in word:
@@ -100,9 +104,16 @@ def check(letter, masked, word):
             open_final_screen()
         
     else:
-        nice_try_message = tk.Label(frame, text="Nice try, but this letter is not in the word", fg="orange")
-        nice_try_message.pack(pady=5)
-        root.after(3000, nice_try_message.destroy)
+        if len(letter.get()) > 1 or letter.get().isalpha == False:
+            invalid_letter_message = tk.Label(frame, text='Please type a valid letter', fg="red")
+            invalid_letter_message.pack(pady=5)
+            root.after(3000, invalid_letter_message.destroy)
+
+
+        else:
+            nice_try_message = tk.Label(frame, text="Nice try, but this letter is not in the word", fg="orange")
+            nice_try_message.pack(pady=5)
+            root.after(3000, nice_try_message.destroy)
 
 
     letter.delete(0, tk.END)
@@ -110,11 +121,12 @@ def check(letter, masked, word):
 
 # Create main window
 root = tk.Tk()
+root.title("Hangman-game")
 root.geometry("300x200")
 current_label = None
 
 # Create a frame
-frame = tk.Frame(root, bg="lightblue")
+frame = tk.Frame(root, bg="yellow")
 frame.pack(fill="both", expand=True)
 
 # Initial content
