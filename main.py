@@ -1,6 +1,5 @@
-import os
-import time
 from tkinter import *
+from PIL import Image, ImageTk
 
 random_word = 'game'
 """Predefine a random word and the number of attempts"""
@@ -27,11 +26,17 @@ def line_definition(word: str, guessed_letters: set):
     return ''.join(char if char.lower() in guessed_letters else '*' for char in word)
 
 def open_final_screen():
+    global image
+
     for widget in frame.winfo_children():
         widget.destroy()
-    new_label = tk.Label(frame, text=f'CONGRATULATIONS', font=("Arial", 18) )
-    new_label.pack()
-    frame.config(bg="lightgreen")
+
+    image = Image.open("img/congrats.jpg")
+    image = image.resize((300, 150))  
+    image = ImageTk.PhotoImage(image)
+
+    label = tk.Label(frame, image=image)
+    label.pack()
 
 
 def start_multiplayer(typed_word):
@@ -99,7 +104,7 @@ def check(letter, masked, word):
         nice_try_message.pack(pady=5)
         root.after(3000, nice_try_message.destroy)
 
-        
+
     letter.delete(0, tk.END)
 
 
