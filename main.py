@@ -8,7 +8,7 @@ guessed_letters = set()
 
 import tkinter as tk
 
-def update_frame():
+def play_multiplayer():
     # Clear all widgets inside the frame
     for widget in frame.winfo_children():
         widget.destroy()
@@ -17,10 +17,9 @@ def update_frame():
     new_label = tk.Label(frame, text="Choose a word for your player:", font=("Arial", 12))
     new_label.pack(pady=5)
 
-    entry = tk.Entry(frame, font=("Arial", 12))
-    entry.pack(pady=5)
-
-    submit_btn = tk.Button(frame, text="Submit", command=lambda: print(f"Hello, {entry.get()}"))
+    new_typed_word = tk.Entry(frame, font=("Arial", 12))
+    new_typed_word.pack(pady=5)
+    submit_btn = tk.Button(frame, text="Submit", command= lambda: start_multiplayer(new_typed_word.get()))
     submit_btn.pack(pady=5)
 
 def line_definition(word: str, guessed_letters: set):
@@ -30,9 +29,26 @@ def line_definition(word: str, guessed_letters: set):
 def open_final_screen():
     for widget in frame.winfo_children():
         widget.destroy()
-    new_label = tk.Label(frame, text=f'CONGRATULATIONS')
+    new_label = tk.Label(frame, text=f'CONGRATULATIONS', font=("Arial", 18) )
     new_label.pack()
     frame.config(bg="lightgreen")
+
+
+def start_multiplayer(typed_word):
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+    #Show the new world as '*
+    new_label = tk.Label(frame, text=f'Your random word has {len(typed_word)} letters')
+    masked_word = tk.Label(frame, text=line_definition(typed_word, guessed_letters))
+    typed_letter = tk.Entry(frame, font=("Arial", 12))
+    submit_btn = tk.Button(frame, text="Submit", command=lambda: check(typed_letter,masked_word, typed_word))
+
+
+    submit_btn.pack(pady=5)
+    typed_letter.pack(pady=5)
+    new_label.pack(pady=5)
+    masked_word.pack()
     
 
 def start_solo():
@@ -44,59 +60,48 @@ def start_solo():
     new_label = tk.Label(frame, text=f'Your random word has {len(random_word)} letters')
     masked_word = tk.Label(frame, text=line_definition(random_word, guessed_letters))
     typed_letter = tk.Entry(frame, font=("Arial", 12))
-    submit_btn = tk.Button(frame, text="Submit", command=lambda: check(typed_letter.get()))
-
-    def clear_word():
-        masked_word.destroy()
-
-    def clear_camp():
-        typed_letter.delete(0, tk.END) ##Clear entry
-
-        #or typed_letter.get().isalpha == False
-    def check(letter):
-        clear_camp()
-        global current_label
-
-        if len(letter) > 1:
-            invalid_letter_message = tk.Label(frame, text='Please type a valid letter', fg="red")
-            invalid_letter_message.pack(pady=5)
-            root.after(3000, invalid_letter_message.destroy)
-
-
-        if letter in random_word:
-            clear_word()
-            if current_label:
-                current_label.destroy()
-            
-            guessed_letters.add(letter)
-            masked_word = tk.Label(frame, text=line_definition(random_word, guessed_letters))
-            masked_word.pack()
-            current_label = masked_word
-            
-        else:
-            nice_try_message = tk.Label(frame, text="Nice try, but this letter is not in the word", fg="orange")
-            nice_try_message.pack(pady=5)
-            root.after(3000, nice_try_message.destroy)
-
-
-        """Verify if the user already have guessed all the letters in the random word"""  
-        if '*' not in masked_word.cget("text"):
-            print("Congratulations! You guessed the word!")
-            open_final_screen()
-           
-
-        
-
-
-           
-
-
+    submit_btn = tk.Button(frame, text="Submit", command=lambda: check(typed_letter, masked_word, random_word))
 
 
     submit_btn.pack(pady=5)
     typed_letter.pack(pady=5)
     new_label.pack(pady=5)
     masked_word.pack()
+    
+
+def check(letter, masked, word):
+    # letter.delete(0, tk.END)
+    global current_label
+
+    if len(letter.get()) > 1 or letter.get().isalpha == False:
+        invalid_letter_message = tk.Label(frame, text='Please type a valid letter', fg="red")
+        invalid_letter_message.pack(pady=5)
+        root.after(3000, invalid_letter_message.destroy)
+
+
+    if letter.get() in word:
+        masked.destroy()
+        if current_label:
+            current_label.destroy()
+        
+        guessed_letters.add(letter.get())
+        masked_word = tk.Label(frame, text=line_definition(word, guessed_letters))
+        masked_word.pack()
+        current_label = masked_word
+
+        """Verify if the user already have guessed all the letters in the random word"""  
+        if '*' not in masked_word.cget("text"):
+            print("Congratulations! You guessed the word!")
+            open_final_screen()
+        
+    else:
+        nice_try_message = tk.Label(frame, text="Nice try, but this letter is not in the word", fg="orange")
+        nice_try_message.pack(pady=5)
+        root.after(3000, nice_try_message.destroy)
+
+        
+    letter.delete(0, tk.END)
+
 
 # Create main window
 root = tk.Tk()
@@ -114,13 +119,10 @@ initial_label.pack(pady=10)
 btn_play_solo = tk.Button(frame, text="Play Solo", command=start_solo)
 btn_play_solo.pack(pady=10)
 
-btn_play_multiplayer = tk.Button(frame, text="Play Multiplayer", command=update_frame)
+btn_play_multiplayer = tk.Button(frame, text="Play Multiplayer", command=play_multiplayer)
 btn_play_multiplayer.pack(pady=10)
 
 root.mainloop()
-
-
-
 
 
 """Start with a welcome message and reveal the number of characters of the random word"""
