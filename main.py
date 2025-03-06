@@ -115,8 +115,7 @@ def check(letter, masked, word):
             nice_try_message.pack(pady=5)
             root.after(3000, nice_try_message.destroy)
 
-
-    letter.delete(0, tk.END)
+    letter.delete(0, len(word))
 
 
 # Create main window
